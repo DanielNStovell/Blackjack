@@ -32,4 +32,4 @@ A simple command-line Blackjack game written in Python without external librarie
 
 ## Files
 
-- `BJ.py` - Main game file 
+- `main.py` - Main game file 
