@@ -75,6 +75,39 @@ def Calculate_Hand(hand):
 
   return total
 
+def Draw(dealer_hand, player_hand, is_standing):
+  print("\n"*10)
+  # card_display_template = "#######\n#     #\n#     #\n#     #\n#     #\n#######"
+
+  dealer_hand_display = dealer_hand.copy()
+
+  if is_standing:
+    dealer_hand_display[1] = "??"
+
+  for hand in [dealer_hand_display, player_hand]:
+    card_display_list = []
+    for card in hand:
+      character = card[:-1]
+      suit = card[-1]
+      if len(character) == 2:
+        card_display = ["#######","#     #",f"# {character}{suit} #","#     #","#     #","#######"]
+      else:
+        card_display = ["#######","#     #",f"# {character} {suit} #","#     #","#     #","#######"]
+      card_display_list.append(card_display)
+
+    for row_idx in range(len(card_display_list[0])):
+      row = ""
+      for card_idx in range(len(card_display_list)):
+        row += card_display_list[card_idx][row_idx]
+        row += " "
+        if row_idx == (len(card_display_list[0]) - 1) // 2 and card_idx == len(card_display_list) - 1:
+          if is_standing and hand == dealer_hand_display:
+            row += f"Minimum: {Calculate_Hand(hand[:-1])}"
+          else:
+            row += f"Total: {Calculate_Hand(hand)}"
+      print(row)
+    print('\n')
+
 def Play_Round():
   deck = Create_Deck()
   deck = Shuffle_Cards(deck)
@@ -84,28 +117,25 @@ def Play_Round():
   player_hand = [deck[0], deck[2]]
   next_card_idx = 4
 
+  Draw(dealer_hand, player_hand, True)
+
   end = False
 
   # Checks for a natural blackjack
   if Calculate_Hand(player_hand) == 21 and Calculate_Hand(dealer_hand) != 21:
-    print(f"Dealer's Hand: {dealer_hand} (Total: {Calculate_Hand(dealer_hand)})")
-    print(f"Player's Hand: {player_hand} (Total: {Calculate_Hand(player_hand)})")
+    Draw(dealer_hand, player_hand, False)
     print("You won")
     end = True
   elif Calculate_Hand(player_hand) == 21 and Calculate_Hand(dealer_hand) == 21:
-    print(f"Dealer's Hand: {dealer_hand} (Total: {Calculate_Hand(dealer_hand)})")
-    print(f"Player's Hand: {player_hand} (Total: {Calculate_Hand(player_hand)})")
+    Draw(dealer_hand, player_hand, False)
     print("You draw")
     end = True
   elif Calculate_Hand(dealer_hand) == 21:
-    print(f"Dealer's Hand: {dealer_hand} (Total: {Calculate_Hand(dealer_hand)})")
-    print(f"Player's Hand: {player_hand} (Total: {Calculate_Hand(player_hand)})")
+    Draw(dealer_hand, player_hand, False)
     print("You lost")
     end = True
 
   while not end:
-    print(f"Dealer's Hand: {dealer_hand[0]} ? (Minimum: {Calculate_Hand(dealer_hand[:-1])})")
-    print(f"Player's Hand: {player_hand} (Total: {Calculate_Hand(player_hand)})")
     print("1. hit\n2. stand")
     
     action = input("What do you do? (1, 2): ")
@@ -121,6 +151,8 @@ def Play_Round():
     
     if Calculate_Hand(player_hand) > 21:
       end = True
+    
+    Draw(dealer_hand, player_hand, True)
 
     if end:
       # The dealer draws until they reach 17 or more (some blackjack rule)
@@ -128,8 +160,7 @@ def Play_Round():
         dealer_hand.append(deck[next_card_idx])
         next_card_idx += 1
 
-      print(f"Dealer's Hand: {dealer_hand} (Total: {Calculate_Hand(dealer_hand)})")
-      print(f"Player's Hand: {player_hand} (Total: {Calculate_Hand(player_hand)})")
+      Draw(dealer_hand, player_hand, False)
 
       player_score = Calculate_Hand(player_hand)
       dealer_score = Calculate_Hand(dealer_hand)
@@ -151,6 +182,9 @@ if __name__ == "__main__":
   continue_playing = True
   while continue_playing:
     Play_Round()
-    play_again = input("Do you want to play again? (yes/no): ").strip().lower()
-    if play_again != "yes":
+    print("Do you want to play again?")
+    print("1. Yes")
+    print("2. No")
+    play_again = int(input("Do you want to play again? (1/2): "))
+    if play_again != 1:
       continue_playing = False
