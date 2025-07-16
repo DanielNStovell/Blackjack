@@ -4,9 +4,10 @@ suits = "♠♥♦♣"
 
 class LCG_Pseudo_Random_Generator:
   def __init__(self, seed=None):
-    # Borland C/C++
+    # Borland C/C++ Preset
     self.a = 22695477
     self.c = 1
+
     self.m = 2**31
     self.x0 = seed
 
@@ -84,27 +85,21 @@ def Draw(dealer_hand, player_hand, is_standing):
   if is_standing:
     dealer_hand_display[1] = "??"
 
-  for hand in [dealer_hand_display, player_hand]:
-    card_display_list = []
-    for card in hand:
-      character = card[:-1]
-      suit = card[-1]
-      if len(character) == 2:
-        card_display = ["#######","#     #",f"# {character}{suit} #","#     #","#     #","#######"]
-      else:
-        card_display = ["#######","#     #",f"# {character} {suit} #","#     #","#     #","#######"]
-      card_display_list.append(card_display)
+  def Make_Card_Display(character, suit):
+    center = f"# {character} {suit} #" if len(character) == 1 else f"# {character}{suit} #"
+    return ["#######","#     #", center,"#     #","#     #","#######"]
 
+  for hand in [dealer_hand_display, player_hand]:
+    card_display_list = [Make_Card_Display(card[:-1], card[-1]) if card != "??" else 
+                         ["#######", "#     #", "#  ?  #", "#     #", "#     #", "#######"] 
+                         for card in hand]
+    
     for row_idx in range(len(card_display_list[0])):
-      row = ""
-      for card_idx in range(len(card_display_list)):
-        row += card_display_list[card_idx][row_idx]
-        row += " "
-        if row_idx == (len(card_display_list[0]) - 1) // 2 and card_idx == len(card_display_list) - 1:
-          if is_standing and hand == dealer_hand_display:
-            row += f"Minimum: {Calculate_Hand(hand[:-1])}"
-          else:
-            row += f"Total: {Calculate_Hand(hand)}"
+      row = " ".join(card[row_idx] for card in card_display_list)
+      if row_idx == 2: # Middle row
+        label = "Minimum" if is_standing and hand == dealer_hand_display else "Total"
+        total = Calculate_Hand(hand if not (is_standing and hand == dealer_hand_display) else hand[:-1])
+        row += f" {label}: {total}"
       print(row)
     print('\n')
 
@@ -117,20 +112,23 @@ def Play_Round():
   player_hand = [deck[0], deck[2]]
   next_card_idx = 4
 
+  player_score = Calculate_Hand(player_hand)
+  dealer_score = Calculate_Hand(dealer_hand)
+
   Draw(dealer_hand, player_hand, True)
 
   end = False
 
   # Checks for a natural blackjack
-  if Calculate_Hand(player_hand) == 21 and Calculate_Hand(dealer_hand) != 21:
+  if player_score == 21 and dealer_score != 21:
     Draw(dealer_hand, player_hand, False)
     print("You won")
     end = True
-  elif Calculate_Hand(player_hand) == 21 and Calculate_Hand(dealer_hand) == 21:
+  elif player_score == 21 and dealer_score == 21:
     Draw(dealer_hand, player_hand, False)
     print("You draw")
     end = True
-  elif Calculate_Hand(dealer_hand) == 21:
+  elif dealer_score == 21:
     Draw(dealer_hand, player_hand, False)
     print("You lost")
     end = True
@@ -138,30 +136,38 @@ def Play_Round():
   while not end:
     print("1. hit\n2. stand")
     
-    action = input("What do you do? (1, 2): ")
+    action = input("What do you do? (1, 2): ").strip()
+    while action not in ["1", "2"]:
+      print("Please enter either number 1 or 2!")
+      action = input("What do you do? (1, 2): ").strip()
     
     if action == "1":
-      player_hand.append(deck[next_card_idx])
-      next_card_idx += 1
+      if next_card_idx < len(deck):
+        player_hand.append(deck[next_card_idx])
+        next_card_idx += 1
+      else:
+        print("Deck is empty")
     elif action == "2":
       end = True
     else:
       print("Not an aciton")
       print("Enter number 1 or 2")
     
-    if Calculate_Hand(player_hand) > 21:
+    player_score = Calculate_Hand(player_hand)
+
+    if player_score > 21:
       end = True
-    
+
     Draw(dealer_hand, player_hand, True)
 
     if end:
       # The dealer draws until they reach 17 or more (some blackjack rule)
-      while Calculate_Hand(dealer_hand) < 17:
+      while dealer_score < 17 and next_card_idx < len(deck):
         dealer_hand.append(deck[next_card_idx])
         next_card_idx += 1
+        dealer_score = Calculate_Hand(dealer_hand)
 
       Draw(dealer_hand, player_hand, False)
-
       player_score = Calculate_Hand(player_hand)
       dealer_score = Calculate_Hand(dealer_hand)
 
@@ -185,6 +191,12 @@ if __name__ == "__main__":
     print("Do you want to play again?")
     print("1. Yes")
     print("2. No")
-    play_again = int(input("Do you want to play again? (1/2): "))
-    if play_again != 1:
+    play_again = input("Do you want to play again? (1, 2): ").strip()
+
+    while play_again not in ["1", "2"]:
+      print("Please enter either number 1 or 2!")
+      play_again = input("Do you want to play again? (1, 2): ").strip()
+    
+    if play_again != "1":
       continue_playing = False
+      print("Thank you for playing!")
