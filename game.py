@@ -93,10 +93,10 @@ class Game:
       self.result = "Draw"
 
   def Get_Player_Hand(self):
-    return self.player.hand.cards
+    return str(self.player.hand)
 
-  def Get_dealer_Hand(self):
-    return self.dealer.hand.cards
+  def Get_Dealer_Hand(self):
+    return str(self.dealer.hand)
 
   def Get_Scores(self):
     return self.player.hand.Calculate_Score(), self.dealer.hand.Calculate_Score()
