@@ -106,3 +106,6 @@ class Game:
 
   def Get_Result(self):
     return self.result
+  
+  def Get_Chips(self):
+    return self.chips

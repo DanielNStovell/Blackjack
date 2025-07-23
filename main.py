@@ -2,7 +2,10 @@ import pygame
 import sys
 from game import Game
 
-background_colour = (40, 140, 50)
+pygame.init()
+
+
+background_colour = (0, 100, 0)
 
 mul = 80
 
@@ -90,7 +93,7 @@ def Load_Dealer_Card_Image():
   if not round.Is_Over():
     new_dealer_cards = dealer_cards[:-1]
     new_dealer_cards.append("Back")
-    
+
   for idx, card in enumerate(new_dealer_cards):
     if card in card_image_dict:
       path = card_image_dict[card]
@@ -141,14 +144,40 @@ def Draw_Cards(hand):
     pygame.draw.circle(screen, (0, 255, 0), (card.x, card.y), 5)
     pygame.draw.circle(screen, (0, 255, 0), (card.x + card_width, card.y), 5)
 
+font = pygame.font.Font('freesansbold.ttf', 32)
+
+chip_amount = round.Get_Chips()
+text = font.render(f'Chips: {chip_amount}', True, (255, 255, 255))
+textRect = text.get_rect()
+textRect.bottomright = (screen_width-len(f"{chip_amount}")*10, 50)
+
 while running:
   screen.fill(background_colour)
-
+  
   Draw_Cards("Player")
   Draw_Cards("Dealer")
 
+  screen.blit(text, textRect)
+
   pygame.draw.circle(screen, (255, 0, 0), (screen_width//2, screen_height//2), 20)
+
   for event in pygame.event.get():
+
+    if event.type == pygame.KEYDOWN:
+      if event.key == pygame.K_SPACE and not round.Get_Result():
+        round.Player_Hit()
+        player_cards = round.Get_Player_Hand().split()
+        print(player_cards)
+        print(dealer_cards)
+      elif event.key == pygame.K_e:
+        round.Player_Stand()
+        print(player_cards)
+        print(dealer_cards)
+      elif event.key == pygame.K_SPACE and round.Get_Result():
+        round.Start_New_Round()
+        player_cards = round.Get_Player_Hand().split()
+        dealer_cards = round.Get_Dealer_Hand().split()
+
     if event.type == pygame.QUIT:
       running = False
 
