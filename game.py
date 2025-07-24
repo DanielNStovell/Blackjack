@@ -33,7 +33,7 @@ class Game:
     
     if player_score == 21 and dealer_score != 21:
       self.state = "player_won"
-      self.result = "You won"
+      self.result = "You win"
     elif player_score == 21 and dealer_score == 21:
       self.state = "draw"
       self.result = "Draw"
@@ -52,7 +52,7 @@ class Game:
     
     if player_score > 21:
       self.state = "player_busted"
-      self.result = "You busted"
+      self.result = "You lost"
     elif player_score == 21:
       self.Player_Stand()
 
