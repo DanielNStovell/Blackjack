@@ -146,7 +146,8 @@ def Draw_Cards(hand):
 
 font = pygame.font.Font('freesansbold.ttf', 32)
 
-chip_amount = round.Get_Chips()
+
+chip_amount = 100
 text = font.render(f'Chips: {chip_amount}', True, (255, 255, 255))
 textRect = text.get_rect()
 textRect.bottomright = (screen_width-len(f"{chip_amount}")*10, 50)
